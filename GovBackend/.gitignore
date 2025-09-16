@@ -1,0 +1,16 @@
+# Build outputs
+/GovApi/bin
+/GovApi/Debug
+/GovApi/net8.0
+obj/
+
+# User-specific
+*.user
+*.vs
+.vscode/
+
+# Secrets
+/GovApi/appsettings.Development.json
+
+# Logs
+*.log
