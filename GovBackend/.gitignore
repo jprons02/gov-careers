@@ -3,6 +3,7 @@
 /GovApi/Debug
 /GovApi/net8.0
 obj/
+publish/
 
 # User-specific
 *.user
