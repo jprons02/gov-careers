@@ -10,16 +10,5 @@
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.20" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
   </ItemGroup>
-
-  <!-- Add this block INSIDE <Project>, but OUTSIDE the other groups -->
-  <PropertyGroup>
-    <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
-    <AspNetCoreModuleName>AspNetCoreModuleV2</AspNetCoreModuleName>
-    <AspNetCoreGenerateWebConfig>true</AspNetCoreGenerateWebConfig>
-    <AspNetCoreProcessPath>dotnet</AspNetCoreProcessPath>
-    <AspNetCoreArguments>.\GovApi.dll</AspNetCoreArguments>
-    <AspNetCoreEnableStdOutLog>true</AspNetCoreEnableStdOutLog>
-    <AspNetCoreStdOutLogFile>\\?\%home%\LogFiles\stdout</AspNetCoreStdOutLogFile>
-  </PropertyGroup>
-
+  
 </Project>
