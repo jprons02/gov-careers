@@ -1,4 +1,6 @@
 // This brings our UsaJobsService class into scope.
+using GovApi.Data;
+using Microsoft.EntityFrameworkCore;
 using GovApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -7,6 +9,16 @@ var builder = WebApplication.CreateBuilder(args);
 // AddHttpClient tells .NET: "If anyone asks for UsaJobsService,
 // create it and give it an HttpClient to use."
 builder.Services.AddHttpClient<UsaJobsService>();
+
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        sqlOptions => sqlOptions.EnableRetryOnFailure()
+    )
+);
+
 
 // Build the app (this sets up everything we registered).
 var app = builder.Build();
