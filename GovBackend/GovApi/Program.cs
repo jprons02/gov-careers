@@ -8,6 +8,18 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Add CORS policy
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:4200") // Angular dev server
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -22,7 +34,24 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidAudience = jwtConfig["Audience"],
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtConfig["Key"]!))
         };
+
+        // 🔎 Add logging for why the token fails
+        options.Events = new JwtBearerEvents
+        {
+            OnAuthenticationFailed = context =>
+            {
+                Console.WriteLine("❌ JWT validation failed: " + context.Exception.Message);
+                return Task.CompletedTask;
+            },
+            OnTokenValidated = context =>
+            {
+                var identityName = context.Principal?.Identity?.Name ?? "(no name)";
+                Console.WriteLine($"✅ JWT validated successfully for: {identityName}");
+                return Task.CompletedTask;
+            }
+        };
     });
+
 
 builder.Services.AddAuthorization();
 
@@ -78,15 +107,18 @@ builder.Services.AddSwaggerGen(c =>
 // Build the app (this sets up everything we registered).
 var app = builder.Build();
 
+app.UseCors("AllowFrontend");   // keep this before auth
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-app.MapControllers();
-app.UseAuthentication();
+app.UseAuthentication();   // 👈 must be before controllers
 app.UseAuthorization();
+
+app.MapControllers();
 
 /// <summary>
 /// Define an API route: GET /api/jobs
