@@ -1,21 +1,30 @@
 // src/app/services/auth.interceptor.ts
-import { HttpInterceptorFn } from '@angular/common/http';
-import { appSettings } from '../app.config';
+import {
+  HttpInterceptorFn,
+  HttpRequest,
+  HttpHandlerFn,
+  HttpErrorResponse,
+} from '@angular/common/http';
+import { inject } from '@angular/core';
+import { AuthService } from './auth.service';
+import { NotificationService } from './notification.service';
+import { catchError } from 'rxjs/operators';
+import { throwError } from 'rxjs';
 
-// Angular 16+ functional interceptor
-export const authInterceptor: HttpInterceptorFn = (req, next) => {
-  const token = localStorage.getItem('token');
+export const authInterceptor: HttpInterceptorFn = (req: HttpRequest<any>, next: HttpHandlerFn) => {
+  const authService = inject(AuthService);
+  const notificationService = inject(NotificationService);
+  const token = authService.getToken();
 
-  if (token) {
-    // Clone request and add Authorization header
-    const cloned = req.clone({
-      setHeaders: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return next(cloned);
-  }
+  const authReq = token ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } }) : req;
 
-  // No token → forward original request
-  return next(req);
+  return next(authReq).pipe(
+    catchError((error: HttpErrorResponse) => {
+      if (error.status === 401) {
+        notificationService.showMessage('Your session has expired. Please log in again.');
+        authService.logout();
+      }
+      return throwError(() => error);
+    })
+  );
 };

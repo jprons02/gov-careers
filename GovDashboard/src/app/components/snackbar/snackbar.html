@@ -1,0 +1,3 @@
+<div *ngIf="notificationService.message$ | async as message" @slide class="snackbar">
+  {{ message }}
+</div>
